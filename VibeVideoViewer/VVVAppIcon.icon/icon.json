@@ -1,0 +1,46 @@
+{
+  "fill" : {
+    "automatic-gradient" : "srgb:0.50963,0.81006,1.00000,1.00000"
+  },
+  "groups" : [
+    {
+      "hidden" : false,
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill" : "none",
+          "glass" : false,
+          "hidden" : false,
+          "image-name" : "vvv.png",
+          "name" : "vvv",
+          "opacity" : 0.75,
+          "position-specializations" : [
+            {
+              "appearance" : "light",
+              "value" : {
+                "scale" : 1,
+                "translation-in-points" : [
+                  10.5,
+                  -34.5
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : [
+      "macOS"
+    ]
+  }
+}
