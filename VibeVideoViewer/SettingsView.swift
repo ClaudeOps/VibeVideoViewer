@@ -133,6 +133,8 @@ struct SettingsView: View {
                         KeyboardShortcutRow(key: "↓", description: "Next video")
                         KeyboardShortcutRow(key: "R", description: "Random video")
                         KeyboardShortcutRow(key: "M", description: "Mute/Unmute")
+                        KeyboardShortcutRow(key: "[", description: "Decrease playback speed")
+                        KeyboardShortcutRow(key: "]", description: "Increase playback speed")
                         KeyboardShortcutRow(key: "B", description: "Boss Key (Mute, Pause, Minimize)")
                         KeyboardShortcutRow(key: "⌘F", description: "Enter full screen")
                         KeyboardShortcutRow(key: "Esc", description: "Exit full screen")

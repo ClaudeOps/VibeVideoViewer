@@ -175,6 +175,12 @@ struct VideoPlayerView: View {
             } else if characters == "." {
                 viewModel.seekForward(seconds: viewModel.settings.seekForwardSeconds)
                 return nil
+            } else if characters == "[" {
+                viewModel.decreasePlaybackSpeed()
+                return nil
+            } else if characters == "]" {
+                viewModel.increasePlaybackSpeed()
+                return nil
             }
         }
         return event

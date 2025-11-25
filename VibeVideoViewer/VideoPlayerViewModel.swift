@@ -60,6 +60,14 @@ class VideoPlayerViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var showingError = false
     @Published var isFullScreen = false
+    @Published var playbackSpeed: Float = 1.0 {
+        didSet {
+            player?.rate = isPlaying ? playbackSpeed : 0
+            if !isLoadingPreferences {
+                savePreferences()
+            }
+        }
+    }
     
     private var isLoadingPreferences = false
     private var isTransitioningFullScreen = false
@@ -67,6 +75,7 @@ class VideoPlayerViewModel: ObservableObject {
     @Published var isSorting = false  // now published for testing scripts
     private let fileManager = FileManager.default
     private let videoExtensions = ["mp4", "mov", "m4v", "3gp"]
+    private let availablePlaybackSpeeds: [Float] = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
     private var timeObserver: Any?
     private var endObserver: Any?
     private var currentScanID = UUID()
@@ -103,6 +112,7 @@ class VideoPlayerViewModel: ObservableObject {
         static let autoResumeOnFocus = "autoResumeOnFocus"
         static let moveLocationPath = "moveLocationPath"
         static let includeSubfolders = "includeSubfolders"
+        static let playbackSpeed = "playbackSpeed"
     }
     
     // MARK: - Preferences
@@ -119,6 +129,7 @@ class VideoPlayerViewModel: ObservableObject {
         UserDefaults.standard.set(settings.pauseOnLoseFocus, forKey: PreferenceKeys.pauseOnLoseFocus)
         UserDefaults.standard.set(settings.autoResumeOnFocus, forKey: PreferenceKeys.autoResumeOnFocus)
         UserDefaults.standard.set(settings.includeSubfolders, forKey: PreferenceKeys.includeSubfolders)
+        UserDefaults.standard.set(playbackSpeed, forKey: PreferenceKeys.playbackSpeed)
         if let moveLocationPath = settings.moveLocationPath {
             UserDefaults.standard.set(moveLocationPath, forKey: PreferenceKeys.moveLocationPath)
         } else {
@@ -181,6 +192,12 @@ class VideoPlayerViewModel: ObservableObject {
         // Load include subfolders setting
         if UserDefaults.standard.object(forKey: PreferenceKeys.includeSubfolders) != nil {
             settings.includeSubfolders = UserDefaults.standard.bool(forKey: PreferenceKeys.includeSubfolders)
+        }
+        
+        // Load playback speed
+        let savedSpeed = UserDefaults.standard.float(forKey: PreferenceKeys.playbackSpeed)
+        if savedSpeed > 0 && availablePlaybackSpeeds.contains(savedSpeed) {
+            playbackSpeed = savedSpeed
         }
         
         // Load mute state
@@ -334,7 +351,7 @@ class VideoPlayerViewModel: ObservableObject {
     }
     
     func resumePlayback() {
-        player?.play()
+        player?.rate = playbackSpeed
         isPlaying = true
     }
     
@@ -433,6 +450,43 @@ class VideoPlayerViewModel: ObservableObject {
                 isFullScreen = false
                 AppLogger.logInfo("Exiting full screen", category: AppLogger.ui)
             }
+        }
+    }
+    
+    // MARK: - Playback Speed Methods
+    
+    func increasePlaybackSpeed() {
+        guard let currentIndex = availablePlaybackSpeeds.firstIndex(of: playbackSpeed),
+              currentIndex < availablePlaybackSpeeds.count - 1 else {
+            AppLogger.logInfo("Already at maximum playback speed: \(playbackSpeed)x", category: AppLogger.playback)
+            return
+        }
+        
+        playbackSpeed = availablePlaybackSpeeds[currentIndex + 1]
+        AppLogger.logInfo("Increased playback speed to \(playbackSpeed)x", category: AppLogger.playback)
+    }
+    
+    func decreasePlaybackSpeed() {
+        guard let currentIndex = availablePlaybackSpeeds.firstIndex(of: playbackSpeed),
+              currentIndex > 0 else {
+            AppLogger.logInfo("Already at minimum playback speed: \(playbackSpeed)x", category: AppLogger.playback)
+            return
+        }
+        
+        playbackSpeed = availablePlaybackSpeeds[currentIndex - 1]
+        AppLogger.logInfo("Decreased playback speed to \(playbackSpeed)x", category: AppLogger.playback)
+    }
+    
+    func resetPlaybackSpeed() {
+        playbackSpeed = 1.0
+        AppLogger.logInfo("Reset playback speed to 1.0x", category: AppLogger.playback)
+    }
+    
+    var playbackSpeedText: String {
+        if playbackSpeed == 1.0 {
+            return "1x"
+        } else {
+            return String(format: "%.2fx", playbackSpeed)
         }
     }
     

@@ -116,9 +116,20 @@ struct VideoInfoView: View {
                 Text(viewModel.videoFiles[viewModel.currentIndex].name)
                     .font(.headline)
                     .lineLimit(1)
-                Text("Video \(viewModel.currentIndex + 1) of \(viewModel.videoFiles.count)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                HStack(spacing: 8) {
+                    Text("Video \(viewModel.currentIndex + 1) of \(viewModel.videoFiles.count)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Text("•")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Text("Speed: \(viewModel.playbackSpeedText)")
+                        .font(.caption)
+                        .foregroundColor(viewModel.playbackSpeed != 1.0 ? .blue : .secondary)
+                        .fontWeight(viewModel.playbackSpeed != 1.0 ? .semibold : .regular)
+                }
             }
         }
         .padding(.top, 10)
