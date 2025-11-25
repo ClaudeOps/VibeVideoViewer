@@ -75,7 +75,7 @@ class VideoPlayerViewModel: ObservableObject {
     @Published var isSorting = false  // now published for testing scripts
     private let fileManager = FileManager.default
     private let videoExtensions = ["mp4", "mov", "m4v", "3gp"]
-    private let availablePlaybackSpeeds: [Float] = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
+    private let availablePlaybackSpeeds: [Float] = [0.05, 0.10, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0]
     private var timeObserver: Any?
     private var endObserver: Any?
     private var currentScanID = UUID()
@@ -351,7 +351,11 @@ class VideoPlayerViewModel: ObservableObject {
     }
     
     func resumePlayback() {
-        player?.rate = playbackSpeed
+        guard let player = player else { return }
+        // Call play() first to start playback immediately (handles all setup)
+        // Then set rate to desired speed (instant adjustment)
+        player.play()
+        player.rate = playbackSpeed
         isPlaying = true
     }
     
