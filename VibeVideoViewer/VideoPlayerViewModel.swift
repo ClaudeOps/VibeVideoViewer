@@ -59,8 +59,11 @@ class VideoPlayerViewModel: ObservableObject {
     }
     @Published var errorMessage: String?
     @Published var showingError = false
+    @Published var isFullScreen = false
     
     private var isLoadingPreferences = false
+    private var isTransitioningFullScreen = false
+    private var wasPlayingBeforeFullScreen = false
     @Published var isSorting = false  // now published for testing scripts
     private let fileManager = FileManager.default
     private let videoExtensions = ["mp4", "mov", "m4v", "3gp"]
@@ -320,6 +323,12 @@ class VideoPlayerViewModel: ObservableObject {
     }
     
     func pausePlayback() {
+        // Don't pause if we're transitioning full screen
+        if isTransitioningFullScreen {
+            AppLogger.logInfo("Ignoring pause request during full screen transition", category: AppLogger.playback)
+            return
+        }
+        
         player?.pause()
         isPlaying = false
     }
@@ -327,6 +336,17 @@ class VideoPlayerViewModel: ObservableObject {
     func resumePlayback() {
         player?.play()
         isPlaying = true
+    }
+    
+    func handleFullScreenTransitionComplete() {
+        // Reset the transition flag
+        isTransitioningFullScreen = false
+        
+        // Restore the playing state from before the transition
+        if wasPlayingBeforeFullScreen && !isPlaying {
+            resumePlayback()
+            AppLogger.logInfo("Restored playback after full screen transition", category: AppLogger.playback)
+        }
     }
     
     func seek(to percentage: Double) {
@@ -372,6 +392,48 @@ class VideoPlayerViewModel: ObservableObject {
         }
         
         AppLogger.logInfo("Boss key activated", category: AppLogger.general)
+    }
+    
+    // MARK: - Full Screen Methods
+    
+    func toggleFullScreen() {
+        if let window = NSApplication.shared.windows.first {
+            // Track playing state before transition
+            wasPlayingBeforeFullScreen = isPlaying
+            isTransitioningFullScreen = true
+            
+            window.toggleFullScreen(nil)
+            isFullScreen = !(window.styleMask.contains(.fullScreen))
+            AppLogger.logInfo("Full screen toggled: \(isFullScreen)", category: AppLogger.ui)
+        }
+    }
+    
+    func enterFullScreen() {
+        if let window = NSApplication.shared.windows.first {
+            if !window.styleMask.contains(.fullScreen) {
+                // Track playing state before transition
+                wasPlayingBeforeFullScreen = isPlaying
+                isTransitioningFullScreen = true
+                
+                window.toggleFullScreen(nil)
+                isFullScreen = true
+                AppLogger.logInfo("Entering full screen", category: AppLogger.ui)
+            }
+        }
+    }
+    
+    func exitFullScreen() {
+        if let window = NSApplication.shared.windows.first {
+            if window.styleMask.contains(.fullScreen) {
+                // Track playing state before transition
+                wasPlayingBeforeFullScreen = isPlaying
+                isTransitioningFullScreen = true
+                
+                window.toggleFullScreen(nil)
+                isFullScreen = false
+                AppLogger.logInfo("Exiting full screen", category: AppLogger.ui)
+            }
+        }
     }
     
     func selectMoveLocation() {

@@ -48,6 +48,23 @@ struct VideoPlayerView: View {
     }
     
     private func setupWindowObservers() {
+        // Observe full screen transitions
+        NotificationCenter.default.addObserver(
+            forName: NSWindow.didEnterFullScreenNotification,
+            object: nil,
+            queue: .main
+        ) { [weak viewModel] _ in
+            viewModel?.handleFullScreenTransitionComplete()
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: NSWindow.didExitFullScreenNotification,
+            object: nil,
+            queue: .main
+        ) { [weak viewModel] _ in
+            viewModel?.handleFullScreenTransitionComplete()
+        }
+        
         // Observe window minimize
         NotificationCenter.default.addObserver(
             forName: NSWindow.didMiniaturizeNotification,
@@ -100,6 +117,23 @@ struct VideoPlayerView: View {
     
     private func handleKeyPress(event: NSEvent, viewModel: VideoPlayerViewModel) -> NSEvent? {
         guard let characters = event.characters?.lowercased() else {
+            return event
+        }
+        
+        // Check for Cmd-F to toggle full screen
+        if event.modifierFlags.contains(.command) && characters == "f" {
+            viewModel.toggleFullScreen()
+            return nil
+        }
+        
+        // Check for Escape to exit full screen (only if in full screen mode)
+        if event.keyCode == 53 { // Escape key
+            if let window = NSApp.keyWindow ?? NSApp.windows.first {
+                if window.styleMask.contains(.fullScreen) {
+                    viewModel.toggleFullScreen()
+                    return nil
+                }
+            }
             return event
         }
         

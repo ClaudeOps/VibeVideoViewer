@@ -134,6 +134,9 @@ struct SettingsView: View {
                         KeyboardShortcutRow(key: "R", description: "Random video")
                         KeyboardShortcutRow(key: "M", description: "Mute/Unmute")
                         KeyboardShortcutRow(key: "B", description: "Boss Key (Mute, Pause, Minimize)")
+                        KeyboardShortcutRow(key: "⌘F", description: "Enter full screen")
+                        KeyboardShortcutRow(key: "Esc", description: "Exit full screen")
+                        KeyboardShortcutRow(key: "Double-click", description: "Toggle full screen")
                         HStack {
                             KeyboardShortcutRow(key: "1", description: "Move file to destination")
                             if viewModel.settings.moveLocationPath == nil {

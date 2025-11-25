@@ -72,9 +72,15 @@ struct VideoContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             if let player = viewModel.player {
-                CustomVideoPlayerView(player: player, onTap: {
-                    viewModel.togglePlayPause()
-                })
+                CustomVideoPlayerView(
+                    player: player,
+                    onTap: {
+                        viewModel.togglePlayPause()
+                    },
+                    onDoubleTap: {
+                        viewModel.toggleFullScreen()
+                    }
+                )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .id(viewModel.currentIndex)
             }
